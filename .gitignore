@@ -1,0 +1,8 @@
+.idea*
+__pycache__*
+*.cfg
+*.db
+setup.py
+*.log
+test.py
+build*
