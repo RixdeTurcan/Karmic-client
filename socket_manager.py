@@ -73,10 +73,11 @@ class SocketManager:
 			openTrades = []
 			for trade in infoOpenTrades:
 				t = trade.split('.')
-				openTrades.append({
-						"pair": t[0],
-						"id": t[1]
-				})
+				if len(t) == 2:
+					openTrades.append({
+							"pair": t[0],
+							"id": t[1]
+					})
 
 			return openTrades
 		return None
