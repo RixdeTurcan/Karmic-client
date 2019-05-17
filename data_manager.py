@@ -58,7 +58,7 @@ class DataManager:
 				"withPopup": self.withPopup,
 				"withManualConfirm": self.withManualConfirm
 		}
-		with open('/pref.cfg', 'w') as configfile:
+		with open('data/pref.cfg', 'w') as configfile:
 			config.write(configfile)
 
 
