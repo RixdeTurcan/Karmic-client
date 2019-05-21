@@ -36,15 +36,13 @@ def main():
 
 	printLog("Start runtime")
 
-	countServer = 100
 	serverIsOnline = False
 	while True:
 		try:
-			countServer += 1
-			if countServer > 100 and serverIsOnline:
+			if not socketManager.isServerOnline() and serverIsOnline:
 				serverIsOnline = False
 				printLog("Server offline")
-			if countServer <= 100 and not serverIsOnline:
+			if socketManager.isServerOnline() and not serverIsOnline:
 				serverIsOnline = True
 				printLog("Server online")
 
@@ -53,11 +51,9 @@ def main():
 			openTrades = socketManager.getOpenTrades()
 			if openTrades is not None:
 				tradingManager.checkOpenTrades(openTrades)
-				countServer = 0
 
 			trade = socketManager.getNextTrade()
 			if trade is not None:
-				countServer = 0
 				if trade["side"] == "buy":
 					qty = tradingManager.getQty(trade["pair"], trade["price"], trade["bag"])
 					log, done = tradingManager.buy(trade["pair"], trade["id"], qty, dataManager.withBinanceTrading, trade["price"])

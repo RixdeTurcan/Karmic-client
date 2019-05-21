@@ -33,6 +33,37 @@ class SocketManager:
 		self.infoSocket = None
 		self.tradeSocket = None
 
+		self.count1 = 0
+		self.count2 = 0
+		self.countOffline = 0
+
+	def isServerOnline(self):
+		online = self.count1 < 200 and self.count2 < 200
+		if online:
+			self.countOffline = 0
+		else:
+			self.countOffline += 1
+			if self.countOffline > 200:
+				self.countOffline = 0
+				try:
+					self.infoSocket.close()
+					self.tradeSocket.close()
+					self.connect()
+				except Exception as e:
+					printLog(e)
+
+		return online
+
+	def connect(self):
+		context = zmq.Context()
+		self.infoSocket = context.socket(zmq.SUB)
+		self.infoSocket.connect(str("tcp://"+self.karmicIp+":"+self.karmicInfoPort).encode('utf-8'))
+		self.infoSocket.setsockopt(zmq.SUBSCRIBE, self.karmicToken.encode("utf-8"))
+
+		self.tradeSocket = context.socket(zmq.SUB)
+		self.tradeSocket.connect(str("tcp://"+self.karmicIp+":"+self.karmicTradePort).encode('utf-8'))
+		self.tradeSocket.setsockopt(zmq.SUBSCRIBE, self.karmicToken.encode("utf-8"))
+
 	def init(self):
 		config = ConfigParser()
 		config.read("data/config.cfg")
@@ -45,18 +76,15 @@ class SocketManager:
 
 		self.crypt = Fernet(b64decode(self.karmicSecret))
 
-		context = zmq.Context()
-		self.infoSocket = context.socket(zmq.SUB)
-		self.infoSocket.connect(str("tcp://"+self.karmicIp+":"+self.karmicInfoPort).encode('utf-8'))
-		self.infoSocket.setsockopt(zmq.SUBSCRIBE, self.karmicToken.encode("utf-8"))
+		self.connect()
 
-		self.tradeSocket = context.socket(zmq.SUB)
-		self.tradeSocket.connect(str("tcp://"+self.karmicIp+":"+self.karmicTradePort).encode('utf-8'))
-		self.tradeSocket.setsockopt(zmq.SUBSCRIBE, self.karmicToken.encode("utf-8"))
 
 	def receiveOpenTrade(self):
+		self.count1 += 1
 		try:
-			return self.infoSocket.recv(flags=zmq.NOBLOCK).decode("utf-8").split(" ", 1)
+			openTrades = self.infoSocket.recv(flags=zmq.NOBLOCK).decode("utf-8").split(" ", 1)
+			self.count1 = 0
+			return openTrades
 		except 	zmq.Again:
 			return [None, None]
 
@@ -83,8 +111,13 @@ class SocketManager:
 		return None
 
 	def receiveTrade(self):
+		self.count2 += 1
 		try:
-			return self.tradeSocket.recv(flags=zmq.NOBLOCK).decode("utf-8").split(" ", 1)
+			trades = self.tradeSocket.recv(flags=zmq.NOBLOCK).decode("utf-8").split(" ", 1)
+			self.count2 = 0
+			if trades[1] == "=":
+				return [None, None]
+			return trades
 		except 	zmq.Again:
 			return [None, None]
 
