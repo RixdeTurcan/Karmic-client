@@ -118,7 +118,7 @@ class TradingManager:
 
 			info = self.binanceWrapper.checkOrder(pair, idBinance)
 			if info["status"] == "FILLED":
-				price = float(info["cummulativeQuoteQty"])
+				price = float(info["price"])
 				self.query.execute("UPDATE trades SET priceBuy="+str(price)+" WHERE id="+str(idTrade))
 				self.dbPair.commit()
 
@@ -136,7 +136,7 @@ class TradingManager:
 
 			info = self.binanceWrapper.checkOrder(pair, idBinance)
 			if info["status"] == "FILLED":
-				price = float(info["cummulativeQuoteQty"])
+				price = float(info["price"])
 				self.query.execute("UPDATE trades SET priceTp="+str(price)+" WHERE id="+str(idTrade))
 				self.dbPair.commit()
 
