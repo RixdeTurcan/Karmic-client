@@ -118,11 +118,15 @@ class TradingManager:
 
 			info = self.binanceWrapper.checkOrder(pair, idBinance)
 			if info["status"] == "FILLED":
-				price = float(info["cummulativeQuoteQty"])/float(info["executedQty"])
-				self.query.execute("UPDATE trades SET priceBuy="+str(price)+" WHERE id="+str(idTrade))
-				self.dbPair.commit()
+				try:
+					price = float(info["cummulativeQuoteQty"])/float(info["executedQty"])
+					self.query.execute("UPDATE trades SET priceBuy="+str(price)+" WHERE id="+str(idTrade))
+					self.dbPair.commit()
 
-				logs.append(self.logBuy(pair, timestampBuy, qty, price))
+					logs.append(self.logBuy(pair, timestampBuy, qty, price))
+				except Exception as e:
+					printLog(e)
+					printLog(info)
 
 		self.query.execute("SELECT id, pair, idTpBinance, timestampTp, qty, priceBuy FROM trades WHERE priceTp IS NULL AND timestampTp IS NOT NULL")
 		fetch = self.query.fetchall()
@@ -136,11 +140,15 @@ class TradingManager:
 
 			info = self.binanceWrapper.checkOrder(pair, idBinance)
 			if info["status"] == "FILLED":
-				price = float(info["cummulativeQuoteQty"])/float(info["executedQty"])
-				self.query.execute("UPDATE trades SET priceTp="+str(price)+" WHERE id="+str(idTrade))
-				self.dbPair.commit()
+				try:
+					price = float(info["cummulativeQuoteQty"])/float(info["executedQty"])
+					self.query.execute("UPDATE trades SET priceTp="+str(price)+" WHERE id="+str(idTrade))
+					self.dbPair.commit()
 
-				logs.append(self.logTp(pair, timestampTp, qty, price, priceBuy))
+					logs.append(self.logTp(pair, timestampTp, qty, price, priceBuy))
+				except Exception as e:
+					printLog(e)
+					printLog(info)
 
 		return logs
 
