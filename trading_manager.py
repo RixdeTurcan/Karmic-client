@@ -246,7 +246,13 @@ class TradingManager:
 	def logTp(self, pair, timestamp, qty, price, priceBuy):
 		posQuote = pair.find("USDT")
 		date = str(datetime.fromtimestamp(timestamp).strftime('%d/%m - %Hh %Mm %Ss'))
-		profit = round(100 * (price / priceBuy - 1.), 1)
+		profit = 0.
+		try:
+			profit = round(100 * (price / priceBuy - 1.), 1)
+		except Exception as e:
+			printLog(e)
+			printLog(price)
+			printLog(priceBuy)
 
 		log = date + " : TP " + str(qty) + " " + pair[:posQuote] + " à " + str(price) + "$ -> profit : " + str(profit) + "%"
 		self.query.execute("INSERT INTO logs(val) VALUES(\""+log+"\")")
