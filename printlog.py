@@ -15,16 +15,33 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Karmic-client.  If not, see <https://www.gnu.org/licenses/>.
 
-import builtins
 import time
+import requests
+
+from configparser import ConfigParser
 from datetime import datetime
 
-file = open('data/karmic-client.log', 'a')
+def getWebhook():
+    config = ConfigParser()
+    config.read("data/config.cfg")
+    hook = config.get("discord", "webhook")
+
+    return hook
+
+def ifNotify():
+    config = ConfigParser()
+    config.read("data/pref.cfg")
+    notify = config.getboolean("gui", "withdiscordnotify")
+
+    return notify
 
 def printLog(message):
     date = str(datetime.fromtimestamp(time.time()).strftime('%d/%m/%y - %Hh %Mm %Ss'))
     toPrint = date+": "+str(message)
+    with open('data/karmic-client.log', 'a') as f:
+        f.write(toPrint + "\n")    
     print(toPrint)
-    file.write(toPrint+"\n")
+    if ifNotify():
+        requests.post(getWebhook(), data={"content": toPrint})
 
 globals()['__builtins__']["printLog"] = printLog
