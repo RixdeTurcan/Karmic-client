@@ -27,6 +27,7 @@ class DataManager:
 		self.withBinanceTrading = None
 		self.withPopup = None
 		self.withManualConfirm = None
+		self.withDiscordNotify = None
 
 	def init(self):
 		config = ConfigParser()
@@ -35,6 +36,7 @@ class DataManager:
 		self.withBinanceTrading = config.getboolean("gui", "withBinanceTrading", fallback=True)
 		self.withPopup = config.getboolean("gui", "withPopup", fallback=False)
 		self.withManualConfirm = config.getboolean("gui", "withManualConfirm", fallback=False)
+		self.withDiscordNotify = config.getboolean("gui", "withDiscordNotify", fallback=False)
 
 		self.savePreferences()
 
@@ -56,7 +58,8 @@ class DataManager:
 		config["gui"] = {
 				"withBinanceTrading": self.withBinanceTrading,
 				"withPopup": self.withPopup,
-				"withManualConfirm": self.withManualConfirm
+				"withManualConfirm": self.withManualConfirm,
+				"withDiscordNotify": self.withDiscordNotify
 		}
 		with open('data/pref.cfg', 'w') as configfile:
 			config.write(configfile)
